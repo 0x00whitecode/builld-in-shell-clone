@@ -16,6 +16,8 @@ fn main() {
 
     match input.trim() {
         "exit 0" => break,
+        // add the echo to this 
+        input if input.starts_with("echo ") => println!("{}", &input[5..]),
         &_ => {
             println!("{}: command not found", input.trim());
         }
