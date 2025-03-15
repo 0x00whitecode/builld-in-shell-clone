@@ -65,8 +65,9 @@ fn main() {
                     let full_path = Path::new(dir).join(command);
                     if full_path.exists() && fs::metadata(&full_path).unwrap().is_file() {
                         // Execute the external program
-                        let output = process::Command::new(full_path)
-                            .args(args)
+                        let output = process::Command::new(&full_path)
+                            .arg(command) // Pass the command name as the first argument
+                            .args(args)   // Pass the rest of the arguments
                             .output()
                             .expect("Failed to execute command");
 
