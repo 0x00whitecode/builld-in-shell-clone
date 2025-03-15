@@ -3,6 +3,7 @@ use std::io::{self, Write};
 
 fn main() {
     // Uncomment this block to pass the first stage
+   loop {
     print!("$ ");
     io::stdout().flush().unwrap();
 
@@ -14,4 +15,5 @@ fn main() {
     // print invalide command here 
     println!("{}: command not found", input.trim());
     input.clear();
+   }
 }
