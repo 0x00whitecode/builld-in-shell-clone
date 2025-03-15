@@ -1,6 +1,10 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::process;
+use std::env;
+use std::path::Path;
+use std::fs;
+
 
 fn main() {
     let builtins = ["echo", "exit", "type"];
@@ -23,8 +27,23 @@ fn main() {
             let command = &input[5..];
             if builtins.contains(&command){
                 println!("{} is a shell builtin", command);
-            }else{
-                println!("{}: not found", command);
+            }else {
+                // Search for the command in PATH
+                let path = env::var("PATH").unwrap_or_default();
+                let mut found = false;
+
+                for dir in path.split(':') {
+                    let full_path = Path::new(dir).join(command);
+                    if full_path.exists() && fs::metadata(&full_path).unwrap().is_file() {
+                        println!("{} is {}", command, full_path.display());
+                        found = true;
+                        break;
+                    }
+                }
+
+                if !found {
+                    println!("{}: not found", command);
+                }
             }
         }
         &_ => {
