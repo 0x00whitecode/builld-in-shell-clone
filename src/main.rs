@@ -13,4 +13,5 @@ fn main() {
     
     // print invalide command here 
     println!("{}: command not found", input.trim());
+    input.clear();
 }
