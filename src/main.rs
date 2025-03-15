@@ -12,6 +12,9 @@ fn main() {
     let mut input = String::new();
     stdin.read_line(&mut input).unwrap();
     
+    if input == "exit 0"{
+        break;
+    }
     // print invalide command here 
     println!("{}: command not found", input.trim());
     input.clear();
