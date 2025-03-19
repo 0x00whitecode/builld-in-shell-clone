@@ -6,7 +6,7 @@ use std::path::Path;
 use std::fs;
 
 fn main() {
-    let builtins = ["echo", "exit", "type"];
+    let builtins = ["echo", "exit", "type", "pwd"];
 
     loop {
         print!("$ ");
@@ -29,6 +29,12 @@ fn main() {
             "exit" if args.get(0) == Some(&"0") => break,
             "echo" => {
                 println!("{}", args.join(" "));
+            }
+            "pwd" => {
+                match env::current_dir() {
+                    Ok(path) => println!("{}", path.display()),
+                    Err(_) => println!("pwd: error retrieving current directory"),
+                }
             }
             "type" => {
                 if let Some(cmd) = args.get(0) {
