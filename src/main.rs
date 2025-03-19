@@ -6,7 +6,7 @@ use std::path::Path;
 use std::fs;
 
 fn main() {
-    let builtins = ["echo", "exit", "type", "pwd"];
+    let builtins = ["echo", "exit", "type", "pwd", "cd"];
 
     loop {
         print!("$ ");
@@ -27,15 +27,37 @@ fn main() {
 
         match command {
             "exit" if args.get(0) == Some(&"0") => break,
+
             "echo" => {
                 println!("{}", args.join(" "));
             }
+
             "pwd" => {
                 match env::current_dir() {
                     Ok(path) => println!("{}", path.display()),
                     Err(_) => println!("pwd: error retrieving current directory"),
                 }
+
+
+
+
             }
+            
+            "cd" => {
+                if let Some(dir) = args.get(0) {
+                    let path = Path::new(dir);
+                    if path.is_absolute() {
+                        if let Err(_) = env::set_current_dir(path) {
+                            println!("cd: {}: No such file or directory", dir);
+                        }
+                    } else {
+                        println!("cd: currently only absolute paths are supported.");
+                    }
+                } else {
+                    println!("cd: missing argument");
+                }
+            }
+
             "type" => {
                 if let Some(cmd) = args.get(0) {
                     if builtins.contains(cmd) {
