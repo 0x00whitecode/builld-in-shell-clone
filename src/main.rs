@@ -43,21 +43,28 @@ fn main() {
 
             }
 
-            "cd" => {
+                        "cd" => {
                     if let Some(dir) = args.get(0) {
-                        let path = Path::new(dir);
+                        let path = if *dir == "~" {
+                            env::var("HOME").unwrap_or_else(|_| String::from("/"))
+                        } else {
+                            dir.to_string()
+                        };
+
+                        let path = Path::new(&path);
                         
                         if path.is_absolute() || path.starts_with(".") || path.starts_with("..") {
                             if let Err(_) = env::set_current_dir(path) {
                                 println!("cd: {}: No such file or directory", dir);
                             }
                         } else {
-                            println!("cd: currently only absolute and relative paths are supported.");
+                            println!("cd: currently only absolute, relative paths, and ~ are supported.");
                         }
                     } else {
                         println!("cd: missing argument");
                     }
                 }
+                                
                            
             "type" => {
                 if let Some(cmd) = args.get(0) {
