@@ -16,7 +16,7 @@ fn parse_input(input: &str) -> Vec<String> {
     while let Some(c) = chars.next() {
         if escape_next {
             match c {
-                'n' => buffer.push('\n'),
+                'n' if in_single_quote || in_double_quote => buffer.push('n'), // Fix here
                 't' => buffer.push('\t'),
                 '\\' => buffer.push('\\'),
                 '"' => buffer.push('"'),
