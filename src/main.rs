@@ -19,8 +19,8 @@ fn parse_input(input: &str) -> Vec<String> {
             escape_next = false;
         } else {
             match c {
-                '\\' if in_double_quotes => {
-                    // Escape the next character inside double quotes
+                '\\' if !in_single_quotes => {
+                    // Escape the next character (outside single quotes)
                     escape_next = true;
                 }
                 '\'' if !in_double_quotes => {
@@ -31,7 +31,7 @@ fn parse_input(input: &str) -> Vec<String> {
                     // Toggle double quotes
                     in_double_quotes = !in_double_quotes;
                 }
-                ' ' if !in_single_quotes && !in_double_quotes => {
+                ' ' if !in_single_quotes && !in_double_quotes && !escape_next => {
                     // Space outside quotes: push current argument
                     if !current_arg.is_empty() {
                         args.push(current_arg.clone());
@@ -53,6 +53,7 @@ fn parse_input(input: &str) -> Vec<String> {
 
     args
 }
+
 fn main() {
     let builtins = ["echo", "exit", "type", "pwd", "cd"];
 
