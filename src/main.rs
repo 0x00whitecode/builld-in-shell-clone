@@ -7,43 +7,48 @@ use std::fs;
 
 fn parse_input(input: &str) -> Vec<String> {
     let mut args = Vec::new();
-    let mut current_arg = String::new();
-    let mut in_single_quotes = false;
-    let mut in_double_quotes = false;
+    let mut buffer = String::new();
+    let mut chars = input.chars().peekable();
+    let mut in_single_quote = false;
+    let mut in_double_quote = false;
     let mut escape_next = false;
 
-    for c in input.chars() {
+    while let Some(c) = chars.next() {
         if escape_next {
-            // Always add the escaped character
-            current_arg.push(c);
+            match c {
+                'n' => buffer.push('\n'),
+                't' => buffer.push('\t'),
+                '\\' => buffer.push('\\'),
+                '"' => buffer.push('"'),
+                '\'' => buffer.push('\''),
+                ' ' => buffer.push(' '),
+                _ => buffer.push(c),
+            }
             escape_next = false;
         } else {
             match c {
-                '\\' => {
+                '\\' if in_double_quote || !in_single_quote => {
                     escape_next = true;
                 }
-                '\'' if !in_double_quotes => {
-                    in_single_quotes = !in_single_quotes;
+                '\'' if !in_double_quote => {
+                    in_single_quote = !in_single_quote;
                 }
-                '"' if !in_single_quotes => {
-                    in_double_quotes = !in_double_quotes;
+                '"' if !in_single_quote => {
+                    in_double_quote = !in_double_quote;
                 }
-                ' ' if !in_single_quotes && !in_double_quotes => {
-                    if !current_arg.is_empty() {
-                        args.push(current_arg.clone());
-                        current_arg.clear();
+                ' ' | '\t' | '\n' if !in_single_quote && !in_double_quote => {
+                    if !buffer.is_empty() {
+                        args.push(buffer.clone());
+                        buffer.clear();
                     }
                 }
-                _ => {
-                    current_arg.push(c);
-                }
+                _ => buffer.push(c),
             }
         }
     }
 
-    // Push the last argument if it exists
-    if !current_arg.is_empty() {
-        args.push(current_arg);
+    if !buffer.is_empty() {
+        args.push(buffer);
     }
 
     args
