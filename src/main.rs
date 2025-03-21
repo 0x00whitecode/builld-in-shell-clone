@@ -9,28 +9,50 @@ fn parse_input(input: &str) -> Vec<String> {
     let mut args = Vec::new();
     let mut current_arg = String::new();
     let mut in_single_quotes = false;
+    let mut in_double_quotes = false;
+    let mut escape_next = false;
 
     for c in input.chars() {
-        match c {
-            '\'' if !in_single_quotes => in_single_quotes = true, // Enter single quotes
-            '\'' if in_single_quotes => in_single_quotes = false, // Exit single quotes
-            ' ' if !in_single_quotes => {
-                if !current_arg.is_empty() {
-                    args.push(current_arg.clone());
-                    current_arg.clear();
+        if escape_next {
+            // Handle escaped characters
+            current_arg.push(c);
+            escape_next = false;
+        } else {
+            match c {
+                '\\' if in_double_quotes => {
+                    // Escape the next character inside double quotes
+                    escape_next = true;
+                }
+                '\'' if !in_double_quotes => {
+                    // Toggle single quotes
+                    in_single_quotes = !in_single_quotes;
+                }
+                '"' if !in_single_quotes => {
+                    // Toggle double quotes
+                    in_double_quotes = !in_double_quotes;
+                }
+                ' ' if !in_single_quotes && !in_double_quotes => {
+                    // Space outside quotes: push current argument
+                    if !current_arg.is_empty() {
+                        args.push(current_arg.clone());
+                        current_arg.clear();
+                    }
+                }
+                _ => {
+                    // Append the character to the current argument
+                    current_arg.push(c);
                 }
             }
-            _ => current_arg.push(c),
         }
     }
 
+    // Push the last argument if it exists
     if !current_arg.is_empty() {
         args.push(current_arg);
     }
 
     args
 }
-
 fn main() {
     let builtins = ["echo", "exit", "type", "pwd", "cd"];
 
