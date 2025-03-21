@@ -14,32 +14,27 @@ fn parse_input(input: &str) -> Vec<String> {
 
     for c in input.chars() {
         if escape_next {
-            // Always preserve the literal value of the escaped character
+            // Always add the escaped character
             current_arg.push(c);
             escape_next = false;
         } else {
             match c {
-                '\\' if !in_single_quotes => {
-                    // Backslash escapes the next character unless in single quotes
+                '\\' => {
                     escape_next = true;
                 }
                 '\'' if !in_double_quotes => {
-                    // Toggle single-quote mode (preserves literal values inside)
                     in_single_quotes = !in_single_quotes;
                 }
                 '"' if !in_single_quotes => {
-                    // Toggle double-quote mode (handles escaping within)
                     in_double_quotes = !in_double_quotes;
                 }
                 ' ' if !in_single_quotes && !in_double_quotes => {
-                    // If space is outside quotes, push the current argument
                     if !current_arg.is_empty() {
                         args.push(current_arg.clone());
                         current_arg.clear();
                     }
                 }
                 _ => {
-                    // Append the character to the current argument
                     current_arg.push(c);
                 }
             }
@@ -53,7 +48,6 @@ fn parse_input(input: &str) -> Vec<String> {
 
     args
 }
-
 
 fn main() {
     let builtins = ["echo", "exit", "type", "pwd", "cd"];
