@@ -4,18 +4,28 @@ use std::process::{self, Command};
 use std::env;
 use std::path::Path;
 use std::fs;
-use regex::Regex;
 
 fn parse_input(input: &str) -> Vec<String> {
-    let re = Regex::new(r"'([^']*)'|(\S+)").unwrap();
     let mut args = Vec::new();
+    let mut current_arg = String::new();
+    let mut in_single_quotes = false;
 
-    for cap in re.captures_iter(input) {
-        if let Some(quoted) = cap.get(1) {
-            args.push(quoted.as_str().to_string());
-        } else if let Some(unquoted) = cap.get(2) {
-            args.push(unquoted.as_str().to_string());
+    for c in input.chars() {
+        match c {
+            '\'' if !in_single_quotes => in_single_quotes = true, // Enter single quotes
+            '\'' if in_single_quotes => in_single_quotes = false, // Exit single quotes
+            ' ' if !in_single_quotes => {
+                if !current_arg.is_empty() {
+                    args.push(current_arg.clone());
+                    current_arg.clear();
+                }
+            }
+            _ => current_arg.push(c),
         }
+    }
+
+    if !current_arg.is_empty() {
+        args.push(current_arg);
     }
 
     args
@@ -28,9 +38,8 @@ fn main() {
         print!("$ ");
         io::stdout().flush().unwrap();
 
-        let stdin = io::stdin();
         let mut input = String::new();
-        stdin.read_line(&mut input).unwrap();
+        io::stdin().read_line(&mut input).unwrap();
         let input = input.trim();
 
         if input.is_empty() {
@@ -67,14 +76,8 @@ fn main() {
                         dir.to_string()
                     };
 
-                    let path = Path::new(&path);
-                    
-                    if path.is_absolute() || path.starts_with(".") || path.starts_with("..") {
-                        if let Err(_) = env::set_current_dir(path) {
-                            println!("cd: {}: No such file or directory", dir);
-                        }
-                    } else {
-                        println!("cd: currently only absolute, relative paths, and ~ are supported.");
+                    if let Err(_) = env::set_current_dir(Path::new(&path)) {
+                        println!("cd: {}: No such file or directory", dir);
                     }
                 } else {
                     println!("cd: missing argument");
@@ -106,8 +109,8 @@ fn main() {
                     println!("Usage: type <command>");
                 }
             }
+
             _ => {
-                // Try executing an external command
                 match Command::new(command).args(command_args).spawn() {
                     Ok(mut child) => {
                         let _ = child.wait();
